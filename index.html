@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anonymous Confessions</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0908;--bg2:#111010;--bg3:#181614;
+  --border:#2a2826;--border2:#3a3633;
+  --text:#e8e0d5;--text2:#9a9089;--text3:#5a524a;
+  --red:#c0392b;--red2:#e74c3c;
+  --gold:#b8860b;--gold2:#d4a017;--accent:#8b1a1a;
+}
+body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;font-size:17px;line-height:1.6}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-family:'Playfair Display',serif;font-size:1.6rem;letter-spacing:0.05em;color:var(--text)}
+.logo span{color:var(--gold2);font-style:italic}
+.btn{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:0.4rem 1rem;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.9rem;transition:all 0.2s}
+.btn:hover{border-color:var(--gold);color:var(--gold2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#f0e8e0}
+.btn.primary:hover{background:var(--red);border-color:var(--red)}
+.btn.small{padding:0.25rem 0.6rem;font-size:0.8rem}
+.btn.danger{border-color:var(--red);color:var(--red2)}
+.btn.danger:hover{background:var(--red);color:#fff}
+.container{max-width:780px;margin:0 auto;padding:2rem 1rem}
+
+/* NEW: Search Styling */
+.search-container{margin-bottom:1.5rem;background:var(--bg2);padding:1rem;border-radius:6px;border:1px solid var(--border);display:flex;gap:0.75rem;align-items:center}
+.search-input{flex:1;background:var(--bg3);border:1px solid var(--border);padding:0.6rem 1rem;color:var(--text);border-radius:4px;font-family:inherit}
+.filter-info{font-size:0.85rem;color:var(--gold);margin-bottom:1rem;display:none;align-items:center;gap:0.5rem}
+.filter-info.active{display:flex}
+
+.compose-box{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1.5rem;margin-bottom:2rem}
+.compose-box h2{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:400;margin-bottom:1rem;color:var(--text2);letter-spacing:0.05em;border-bottom:1px solid var(--border);padding-bottom:0.75rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:0.4rem;font-family:'IBM Plex Mono',monospace}
+input[type=text],input[type=password],textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:0.6rem 0.8rem;color:var(--text);font-family:'Crimson Pro',serif;font-size:1rem;resize:vertical;outline:none;transition:border 0.2s}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{border-color:var(--border2)}
+textarea{min-height:100px}
+
+/* NEW: Tag Styling */
+.tags-container{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem}
+.tag-pill{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);padding:2px 8px;border-radius:12px;cursor:pointer;transition:all 0.2s}
+.tag-pill:hover{border-color:var(--gold);color:var(--gold2)}
+
+.post{background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin-bottom:1.2rem;overflow:hidden}
+.post-header{padding:1rem 1.2rem 0.5rem;display:flex;align-items:center;justify-content:space-between}
+.post-author{font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--text3)}
+.post-time{font-size:0.75rem;color:var(--text3)}
+.post-body{padding:0 1.2rem 0.75rem;font-size:1.05rem;color:var(--text);white-space:pre-wrap;word-break:break-word}
+.post-tags{padding:0 1.2rem 0.75rem;display:flex;flex-wrap:wrap;gap:0.4rem}
+
+.post-image-wrap{padding:0 1.2rem 0.75rem}
+.post-image-wrap img{max-width:100%;border-radius:4px;max-height:350px;object-fit:contain;background:#000}
+.post-actions{padding:0.5rem 1.2rem;border-top:1px solid var(--border);display:flex;gap:1rem;align-items:center}
+.action-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-family:inherit;font-size:0.85rem;display:flex;align-items:center;gap:0.35rem;padding:0.25rem 0;transition:color 0.15s}
+.action-btn:hover{color:var(--text2)}
+.action-btn svg{width:14px;height:14px;fill:currentColor}
+.admin-del{margin-left:auto;color:var(--red)!important}
+
+.comments-section{border-top:1px solid var(--border);background:var(--bg3)}
+.comment{padding:0.75rem 1.2rem;border-bottom:1px solid var(--border)}
+.comment-author{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--text3)}
+.comment-text{font-size:0.95rem;color:var(--text2);word-break:break-word;white-space:pre-wrap}
+.nested-comments{margin-left:1.5rem;border-left:1px solid var(--border);padding-left:0.75rem}
+.comment-form-row{padding:0.6rem 1.2rem;border-top:1px solid var(--border)}
+.inputs-row{display:flex;gap:0.5rem}
+.name-in{width:130px!important}
+.msg-in{flex:1}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:2rem;width:100%;max-width:420px}
+.admin-bar{background:#1a0a0a;border-bottom:1px solid var(--red);padding:0.6rem 2rem;align-items:center;justify-content:space-between;display:none}
+.admin-bar.show{display:flex}
+.empty{text-align:center;padding:4rem 1rem;color:var(--text3)}
+.feed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:1rem}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:0.75rem 1.2rem;border-radius:4px;font-size:0.9rem;z-index:999;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="admin-bar" id="adminBar">
+  <span class="admin-label" style="font-family:'IBM Plex Mono'; color:var(--red2)">ADMIN MODE</span>
+  <button class="btn small danger" onclick="logoutAdmin()">Log out</button>
+</div>
+
+<header>
+  <div class="logo">Anonymous <span>Humiliation Confessions</span></div>
+  <button class="btn small" id="adminLoginBtn" onclick="openAdminModal()">Admin</button>
+</header>
+
+<div class="container">
+  <div class="search-container">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search..." oninput="handleSearch()">
+    <button class="btn small" onclick="clearFilters()">Clear</button>
+  </div>
+
+  <div id="filterStatus" class="filter-info">
+    <span>Filtering by tag: <b id="activeTagName"></b></span>
+    <button class="btn small" onclick="clearFilters()" style="padding: 0 5px; height: 20px;">×</button>
+  </div>
+
+  <div class="compose-box">
+    <h2>Share your confession</h2>
+    <div class="form-row" style="display:flex; gap:1rem; margin-bottom:1rem">
+      <div class="form-group" style="flex:1">
+        <label>Your name (optional)</label>
+        <input type="text" id="postAuthor" placeholder="Leave blank for anon..." maxlength="40">
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="postTags" placeholder="enf, enm, spanking..." maxlength="100">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Your confession</label>
+      <textarea id="postText" placeholder="Confess something..." maxlength="2000" oninput="updateCharCount(this,'postCharCount',2000)"></textarea>
+      <div class="char-count" id="postCharCount" style="text-align:right; font-size:0.75rem; font-family:'IBM Plex Mono'; color:var(--text3)">0 / 2000</div>
+    </div>
+    <div class="form-group">
+      <label>Image (optional)</label>
+      <input type="file" id="postImageInput" accept="image/*,.gif" style="display:none" onchange="handleImageSelect(event)">
+      <button class="btn" style="width:100%; border-style:dashed" onclick="document.getElementById('postImageInput').click()">Upload Image/GIF</button>
+      <div id="postImagePreview"></div>
+    </div>
+    <button class="btn primary" onclick="submitPost()">Confess</button>
+  </div>
+
+  <div class="feed-header">
+    <h1 style="font-family:'Playfair Display'; font-weight:400; font-size:1.3rem">All Confessions</h1>
+    <span class="post-count" id="postCountLabel" style="font-family:'IBM Plex Mono'; font-size:0.75rem; color:var(--text3)"></span>
+  </div>
+  <div id="feed"></div>
+</div>
+
+<div class="overlay" id="adminOverlay">
+  <div class="modal">
+    <h2 style="font-family:'Playfair Display'; margin-bottom:1rem">Admin Access</h2>
+    <input type="text" id="adminUser" placeholder="Username" style="margin-bottom:0.5rem">
+    <input type="password" id="adminPass" placeholder="Password" style="margin-bottom:1rem">
+    <div id="adminError" style="color:var(--red2); display:none; margin-bottom:1rem">Invalid credentials.</div>
+    <div style="display:flex; justify-content:flex-end; gap:0.5rem">
+      <button class="btn" onclick="closeAdminModal()">Cancel</button>
+      <button class="btn primary" onclick="tryAdminLogin()">Log in</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_USER='admin';
+const ADMIN_PASS='Hg25fjKr36$Hgvbs26$$$58Gbnsk**';
+
+let isAdmin=false, posts=[], postImageData=null, expandedComments={};
+let currentSearchQuery = '';
+let currentTagFilter = '';
+
+function timeAgo(ts){const d=Date.now()-ts;if(d<60000)return'just now';if(d<3600000)return Math.floor(d/60000)+'m ago';if(d<86400000)return Math.floor(d/3600000)+'h ago';return Math.floor(d/86400000)+'d ago'}
+function genId(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function savePosts(){localStorage.setItem('confessions_v2',JSON.stringify(posts))}
+function loadPosts(){const d=localStorage.getItem('confessions_v2'); if(d) posts=JSON.parse(d)}
+
+function updateCharCount(el,id,max){
+  const n=el.value.length;
+  document.getElementById(id).textContent=n+' / '+max;
+}
+
+function handleImageSelect(event){
+  const file=event.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    postImageData=e.target.result;
+    document.getElementById('postImagePreview').innerHTML=`<div style="margin-top:10px; position:relative"><img src="${e.target.result}" style="max-height:150px; border-radius:4px"><button class="btn small danger" style="position:absolute; top:0; right:0" onclick="removeImage()">×</button></div>`;
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage(){postImageData=null;document.getElementById('postImagePreview').innerHTML='';document.getElementById('postImageInput').value=''}
+
+function submitPost(){
+  const text=document.getElementById('postText').value.trim();
+  const tagInput=document.getElementById('postTags').value.trim();
+  if(!text&&!postImageData){showToast('Write something first!');return}
+  
+  // Parse tags: split by comma, trim, remove empty, lowercase
+  const tags = tagInput ? tagInput.split(',').map(t => t.trim().toLowerCase()).filter(t => t !== '') : [];
+  const author=document.getElementById('postAuthor').value.trim()||('anon'+Math.floor(Math.random()*90000));
+  
+  posts.unshift({id:genId(),author,text,tags,image:postImageData||null,ts:Date.now(),likes:0,comments:[]});
+  savePosts();
+  document.getElementById('postText').value='';
+  document.getElementById('postAuthor').value='';
+  document.getElementById('postTags').value='';
+  removeImage();
+  renderFeed();
+  showToast('Confession posted.');
+}
+
+// NEW: Search and Filter Logic
+function handleSearch(){
+    currentSearchQuery = document.getElementById('searchInput').value.toLowerCase();
+    renderFeed();
+}
+
+function filterByTag(tag){
+    currentTagFilter = tag.toLowerCase();
+    document.getElementById('activeTagName').textContent = '#' + tag;
+    document.getElementById('filterStatus').classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    renderFeed();
+}
+
+function clearFilters(){
+    currentSearchQuery = '';
+    currentTagFilter = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterStatus').classList.remove('active');
+    renderFeed();
+}
+
+function renderPost(p){
+  const exp=expandedComments[p.id];
+  const imgHtml=p.image?`<div class="post-image-wrap"><img src="${p.image}" loading="lazy"></div>`:'';
+  
+  // Render tags
+  const tagsHtml = (p.tags && p.tags.length) 
+    ? `<div class="post-tags">${p.tags.map(t => `<span class="tag-pill" onclick="filterByTag('${t}')">#${esc(t)}</span>`).join('')}</div>` 
+    : '';
+
+  const adminDel=isAdmin?`<button class="action-btn admin-del" onclick="deletePost('${p.id}')">Delete</button>`:'';
+  
+  return `<div class="post">
+    <div class="post-header"><span class="post-author">${esc(p.author)}</span><span class="post-time">${timeAgo(p.ts)}</span></div>
+    ${p.text?`<div class="post-body">${esc(p.text)}</div>`:''}
+    ${imgHtml}
+    ${tagsHtml}
+    <div class="post-actions">
+      <button class="action-btn" onclick="toggleLike('${p.id}')">♥ ${p.likes||0}</button>
+      <button class="action-btn" onclick="toggleComments('${p.id}')">Comments (${p.comments.length})</button>
+      ${adminDel}
+    </div>
+    ${exp ? `<div class="comments-section">${p.comments.map(c=>`<div class="comment" style="padding:10px 20px; border-bottom:1px solid var(--border)"><small style="color:var(--text3)">${esc(c.author)}</small><div>${esc(c.text)}</div></div>`).join('')}</div>` : ''}
+    <div class="comment-form-row">
+      <div class="inputs-row">
+        <input class="name-in" id="cname_${p.id}" type="text" placeholder="Name">
+        <input class="msg-in" id="cmsg_${p.id}" type="text" placeholder="Comment..." onkeydown="if(event.key==='Enter')submitComment('${p.id}')">
+        <button class="btn small" onclick="submitComment('${p.id}')">Send</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFeed(){
+  const feed=document.getElementById('feed');
+  
+  // Apply filters
+  const filteredPosts = posts.filter(p => {
+      const matchesSearch = p.text.toLowerCase().includes(currentSearchQuery) || 
+                            p.author.toLowerCase().includes(currentSearchQuery);
+      const matchesTag = !currentTagFilter || (p.tags && p.tags.includes(currentTagFilter));
+      return matchesSearch && matchesTag;
+  });
+
+  document.getElementById('postCountLabel').textContent=filteredPosts.length+' confession'+(filteredPosts.length!==1?'s':'');
+  feed.innerHTML=filteredPosts.length?filteredPosts.map(renderPost).join(''):'<div class="empty"><p>No confessions found matching your search.</p></div>';
+}
+
+/* Original Logic Retained */
+function toggleLike(id){ const p=posts.find(x=>x.id===id); if(p){p.likes++; savePosts(); renderFeed()} }
+function toggleComments(id){ expandedComments[id]=!expandedComments[id]; renderFeed() }
+function submitComment(postId){
+    const text=document.getElementById('cmsg_'+postId).value.trim();
+    if(!text)return;
+    const author=document.getElementById('cname_'+postId).value.trim()||'anon';
+    const p=posts.find(x=>x.id===postId);
+    p.comments.push({author, text, ts:Date.now()});
+    savePosts(); renderFeed();
+}
+function openAdminModal(){document.getElementById('adminOverlay').classList.add('open')}
+function closeAdminModal(){document.getElementById('adminOverlay').classList.remove('open')}
+function tryAdminLogin(){
+    if(document.getElementById('adminUser').value===ADMIN_USER && document.getElementById('adminPass').value===ADMIN_PASS){
+        isAdmin=true; closeAdminModal(); document.getElementById('adminBar').classList.add('show'); renderFeed();
+    }
+}
+function logoutAdmin(){ isAdmin=false; document.getElementById('adminBar').classList.remove('show'); renderFeed(); }
+function deletePost(id){ posts=posts.filter(x=>x.id!==id); savePosts(); renderFeed(); }
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+
+loadPosts(); renderFeed();
+</script>
+</body>
+</html>
